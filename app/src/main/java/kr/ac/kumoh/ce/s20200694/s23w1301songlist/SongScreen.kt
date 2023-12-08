@@ -62,7 +62,10 @@ fun SongApp(songList: List<Song>) {
         startDestination = SongScreen.List.name,
     ) {
         composable(route = SongScreen.List.name) {
-            SongList(navController, songList)
+            SongList(songList)
+            {
+                navController.navigate(it)
+            }
         }
         composable(
             route = SongScreen.Detail.name + "/{index}",
@@ -78,24 +81,29 @@ fun SongApp(songList: List<Song>) {
 }
 
 @Composable
-fun SongList(navController: NavController, list: List<Song>) {
+fun SongList(
+    list: List<Song>,
+    onNavigateToDetail: (String) -> Unit
+) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(horizontal = 8.dp)
     ) {
         items(list.size) {
-            SongItem(navController, list, it)
+            SongItem(it, list[it], onNavigateToDetail)
         }
     }
 }
 
 @Composable
-fun SongItem(navController: NavController,
-             songList: List<Song>,
-             index: Int) {
+fun SongItem(
+    index: Int,
+    song: Song,
+    onNavigateToDetail: (String) -> Unit
+    ) {
     Card(
         modifier = Modifier.clickable {
-            navController.navigate(SongScreen.Detail.name + "/$index")
+            onNavigateToDetail(SongScreen.Detail.name + "/$index")
         },
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
@@ -106,7 +114,7 @@ fun SongItem(navController: NavController,
                 .padding(8.dp)
         ) {
             AsyncImage(
-                model = "https://picsum.photos/300/300?random=${songList[index].id}",
+                model = "https://picsum.photos/300/300?random=${song.id}",
                 contentDescription = "노래 앨범 이미지",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -119,8 +127,8 @@ fun SongItem(navController: NavController,
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                TextTitle(songList[index].title)
-                TextSinger(songList[index].singer)
+                TextTitle(song.title)
+                TextSinger(song.singer)
             }
         }
     }
